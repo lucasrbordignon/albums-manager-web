@@ -1,5 +1,4 @@
 import { useForm } from 'react-hook-form'
-import { AlertCircle } from 'lucide-react'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import {
@@ -13,7 +12,6 @@ import {
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import type { Album } from './IAlbums'
 
 type FormData = {
@@ -25,7 +23,6 @@ type Props = {
   open: boolean
   onOpenChange: (open: boolean) => void
   creating: boolean
-  error: string | null
   onSubmit: (data: FormData) => Promise<void>
   mode?: 'create' | 'edit'
   album?: Album
@@ -37,7 +34,6 @@ export default function AlbumDialog({
   open,
   onOpenChange,
   creating,
-  error,
   onSubmit,
   mode = 'create',
   album,
@@ -108,14 +104,6 @@ export default function AlbumDialog({
                 </FormItem>
               )}
             />
-
-            {error && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Erro</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
 
             <div className="flex justify-end gap-2">
               <Button type="button" variant="secondary" onClick={handleClose} disabled={creating}>

@@ -1,3 +1,5 @@
+import { api } from '@/config/api'
+import { isAuthenticated, refreshToken } from '@/services/auth'
 import { createContext, useContext, useEffect, useState } from 'react'
 
 type User = {
@@ -26,24 +28,66 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [tokens, setTokens] = useState<AuthTokens | null>(null)
 
   useEffect(() => {
-    const stored = localStorage.getItem('auth')
-    if (stored) {
+    const restoreSession = async () => {
+      const stored = localStorage.getItem('auth')
+      if (!stored) return
+
       const parsed = JSON.parse(stored)
-      setUser(parsed.user)
-      setTokens({ accessToken: parsed.accessToken, refreshToken: parsed.refreshToken })
+
+      api.defaults.headers.common.Authorization = `Bearer ${parsed.accessToken}`
+
+      try {
+        await isAuthenticated()
+
+        setUser(parsed.user)
+        setTokens({
+          accessToken: parsed.accessToken,
+          refreshToken: parsed.refreshToken,
+        })
+      } catch {
+        try {
+          const response = await refreshToken(parsed.refreshToken)
+
+          const { accessToken } = response.data
+
+          api.defaults.headers.common.Authorization = `Bearer ${accessToken}`
+
+          setUser(parsed.user)
+          setTokens({
+            accessToken,
+            refreshToken: parsed.refreshToken,
+          })
+
+          localStorage.setItem(
+            'auth',
+            JSON.stringify({
+              ...parsed,
+              accessToken,
+            })
+          )
+        } catch {
+          logout()
+        }
+      }
     }
+
+    restoreSession()
   }, [])
 
   const login = (payload: { user: User; accessToken: string; refreshToken: string }) => {
     setUser(payload.user)
     setTokens({ accessToken: payload.accessToken, refreshToken: payload.refreshToken })
     localStorage.setItem('auth', JSON.stringify(payload))
+
+    api.defaults.headers.common.Authorization = `Bearer ${payload.accessToken}`
   }
 
   const logout = () => {
     setUser(null)
     setTokens(null)
     localStorage.removeItem('auth')
+
+    delete api.defaults.headers.common.Authorization
   }
 
   return (

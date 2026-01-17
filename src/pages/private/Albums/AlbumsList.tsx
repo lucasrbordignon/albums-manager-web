@@ -33,7 +33,6 @@ function AlbumsList() {
   const [error, setError] = useState<string | null>(null)
   const [showModal, setShowModal] = useState(false)
   const [creating, setCreating] = useState(false)
-  const [createError, setCreateError] = useState<string | null>(null)
   const { user, tokens, logout } = useAuth()
 
   useEffect(() => {
@@ -257,11 +256,9 @@ function AlbumsList() {
               }
             }}
             creating={creating}
-            error={createError}
             album={selectedAlbum || undefined}
             mode={dialogMode}
             onSubmit={async data => {
-              setCreateError(null)
               setCreating(true)
               try {
                 if (dialogMode === 'edit' && selectedAlbum) {
@@ -286,7 +283,6 @@ function AlbumsList() {
                 setSelectedAlbum(null)
                 setDialogMode('create')
               } catch (err: any) {
-                setCreateError(err.message || 'Erro ao salvar álbum')
                 toast.error(err.message || 'Erro ao salvar álbum')
               } finally {
                 setCreating(false)
