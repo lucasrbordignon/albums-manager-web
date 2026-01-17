@@ -2,6 +2,8 @@ import { Link, TextField, Button, Snackbar, Alert } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
 import PasswordField from "./PasswordField";
 import { useState } from "react";
+import { useAuth } from "../../../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { login as loginApi } from "../../../services/auth";
 
 type LoginFormData = {
@@ -17,12 +19,17 @@ export default function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
   const onSubmit = async (data: LoginFormData) => {
     setError(null);
     setSuccess(false);
     try {
-      await loginApi(data);
+      const userData = await loginApi(data);
+      login(userData); // salva usuário no contexto
       setSuccess(true);
+      navigate("/private/albums", { replace: true }); // redireciona para Albums
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message || "Erro ao fazer login");
