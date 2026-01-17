@@ -1,24 +1,26 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { PublicLayout } from "../layouts/PublicLayout";
-import { PrivateLayout } from "../layouts/PrivateLayout";
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { PublicLayout } from '../layouts/PublicLayout'
+import { PrivateLayout } from '../layouts/PrivateLayout'
 
-import AuthPage from "../pages/public/auth/AuthPage";
-import Dashboard from "../pages/private/Albums";
-import Profile from "../pages/private/Photos";
+import AlbumsList from '../pages/private/Albums/AlbumsList'
+import Profile from '../pages/private/Photos'
+import LoginPage from '@/pages/public/auth/LoginPage'
+import RegisterPage from '@/pages/public/auth/RegisterPage'
 
 export function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
         <Route element={<PublicLayout />}>
-          <Route path="/auth" element={<AuthPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
         </Route>
 
         <Route element={<PrivateLayout />}>
-          <Route path="/private/albums" element={<Dashboard />} />
+          <Route path="/private/albums" element={<AlbumsList />} />
           <Route path="/private/photos" element={<Profile />} />
         </Route>
       </Routes>
     </BrowserRouter>
-  );
+  )
 }

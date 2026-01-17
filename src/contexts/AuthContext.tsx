@@ -6,10 +6,16 @@ type User = {
   email: string
 }
 
+type AuthTokens = {
+  accessToken: string
+  refreshToken: string
+}
+
 type AuthContextType = {
   user: User | null
+  tokens: AuthTokens | null
   isAuthenticated: boolean
-  login: (user: User) => void
+  login: (payload: { user: User; accessToken: string; refreshToken: string }) => void
   logout: () => void
 }
 
@@ -17,29 +23,35 @@ const AuthContext = createContext<AuthContextType | null>(null)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
+  const [tokens, setTokens] = useState<AuthTokens | null>(null)
 
   useEffect(() => {
-    const stored = localStorage.getItem('user')
+    const stored = localStorage.getItem('auth')
     if (stored) {
-      queueMicrotask(() => setUser(JSON.parse(stored)))
+      const parsed = JSON.parse(stored)
+      setUser(parsed.user)
+      setTokens({ accessToken: parsed.accessToken, refreshToken: parsed.refreshToken })
     }
   }, [])
 
-  const login = (user: User) => {
-    setUser(user)
-    localStorage.setItem('user', JSON.stringify(user))
+  const login = (payload: { user: User; accessToken: string; refreshToken: string }) => {
+    setUser(payload.user)
+    setTokens({ accessToken: payload.accessToken, refreshToken: payload.refreshToken })
+    localStorage.setItem('auth', JSON.stringify(payload))
   }
 
   const logout = () => {
     setUser(null)
-    localStorage.removeItem('user')
+    setTokens(null)
+    localStorage.removeItem('auth')
   }
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        isAuthenticated: !!user,
+        tokens,
+        isAuthenticated: !!user && !!tokens?.accessToken,
         login,
         logout,
       }}

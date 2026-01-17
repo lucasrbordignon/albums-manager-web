@@ -1,11 +1,15 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{ts,tsx}",
-  ],
+  darkMode: ['class'],
+  content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        'royal-blue': '#2563eb',
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
+      },
+    },
   },
-  plugins: [],
+  plugins: [require('tw-animate-css')],
 }
