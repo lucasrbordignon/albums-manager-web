@@ -1,8 +1,8 @@
-import { Link, TextField, Button, Snackbar, Alert } from '@mui/material';
-import { Controller, useFormContext } from 'react-hook-form';
-import PasswordField from './PasswordField';
-import { useState } from 'react';
-import { login as loginApi } from '../../../services/auth';
+import { Link, TextField, Button, Snackbar, Alert } from "@mui/material";
+import { Controller, useFormContext } from "react-hook-form";
+import PasswordField from "./PasswordField";
+import { useState } from "react";
+import { login as loginApi } from "../../../services/auth";
 
 type LoginFormData = {
   email: string;
@@ -10,7 +10,10 @@ type LoginFormData = {
 };
 
 export default function LoginForm() {
-  const { handleSubmit, formState: { isSubmitting } } = useFormContext<LoginFormData>();
+  const {
+    handleSubmit,
+    formState: { isSubmitting },
+  } = useFormContext<LoginFormData>();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
@@ -22,9 +25,9 @@ export default function LoginForm() {
       setSuccess(true);
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setError(err.message || 'Erro ao fazer login');
+        setError(err.message || "Erro ao fazer login");
       } else {
-        setError('Erro ao fazer login');
+        setError("Erro ao fazer login");
       }
     }
   };
@@ -40,7 +43,6 @@ export default function LoginForm() {
             label="E-mail"
             fullWidth
             variant="standard"
-            autoFocus
             autoComplete="email"
             margin="normal"
             error={!!error}
@@ -69,11 +71,23 @@ export default function LoginForm() {
         Entrar
       </Button>
 
-      <Snackbar open={!!error} autoHideDuration={4000} onClose={() => setError(null)}>
-        <Alert severity="error" onClose={() => setError(null)}>{error}</Alert>
+      <Snackbar
+        open={!!error}
+        autoHideDuration={4000}
+        onClose={() => setError(null)}
+      >
+        <Alert severity="error" onClose={() => setError(null)}>
+          {error}
+        </Alert>
       </Snackbar>
-      <Snackbar open={success} autoHideDuration={4000} onClose={() => setSuccess(false)}>
-        <Alert severity="success" onClose={() => setSuccess(false)}>Login realizado com sucesso!</Alert>
+      <Snackbar
+        open={success}
+        autoHideDuration={4000}
+        onClose={() => setSuccess(false)}
+      >
+        <Alert severity="success" onClose={() => setSuccess(false)}>
+          Login realizado com sucesso!
+        </Alert>
       </Snackbar>
     </form>
   );
