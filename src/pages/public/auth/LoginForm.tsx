@@ -27,9 +27,9 @@ export default function LoginForm() {
     setSuccess(false);
     try {
       const userData = await loginApi(data);
-      login(userData); // salva usuário no contexto
+      login(userData);
       setSuccess(true);
-      navigate("/private/albums", { replace: true }); // redireciona para Albums
+      navigate("/private/albums", { replace: true });
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message || "Erro ao fazer login");

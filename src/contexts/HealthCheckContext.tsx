@@ -1,7 +1,14 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { healthcheck } from "@/services/health";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 
 interface HealthStatus {
-  status: 'ok' | 'down' | string;
+  status: "ok" | "down" | string;
   timestamp: string;
   uptime: number;
 }
@@ -13,11 +20,14 @@ interface HealthCheckContextType {
   refresh: () => void;
 }
 
-const HealthCheckContext = createContext<HealthCheckContextType | undefined>(undefined);
+const HealthCheckContext = createContext<HealthCheckContextType | undefined>(
+  undefined,
+);
 
 export const useHealthCheck = () => {
   const ctx = useContext(HealthCheckContext);
-  if (!ctx) throw new Error('useHealthCheck must be used within a HealthCheckProvider');
+  if (!ctx)
+    throw new Error("useHealthCheck must be used within a HealthCheckProvider");
   return ctx;
 };
 
@@ -30,12 +40,12 @@ export const HealthCheckProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('http://localhost:3333/health');
-      if (!res.ok) throw new Error('Erro ao consultar health');
+      const res = await healthcheck();
+      if (!res.ok) throw new Error("Erro ao consultar health");
       const data = await res.json();
       setHealth(data);
     } catch (e: any) {
-      setError(e.message || 'Erro desconhecido');
+      setError(e.message || "Erro desconhecido");
       setHealth(null);
     } finally {
       setLoading(false);
@@ -49,7 +59,9 @@ export const HealthCheckProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <HealthCheckContext.Provider value={{ health, loading, error, refresh: fetchHealth }}>
+    <HealthCheckContext.Provider
+      value={{ health, loading, error, refresh: fetchHealth }}
+    >
       {children}
     </HealthCheckContext.Provider>
   );

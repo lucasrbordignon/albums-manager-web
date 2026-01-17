@@ -55,7 +55,7 @@ export default function AuthPage() {
     <div className="min-h-screen flex flex-col md:flex-row">
       <ThemeToggle />
       <div className="flex flex-col flex-1 items-center justify-center p-6 md:p-12 lg:p-20">
-        <div className="w-full max-w-[480px] mb-8 flex flex-col items-center">
+        <div className="w-full max-w-120 mb-8 flex flex-col items-center">
           <img
             src={logo}
             alt="Logo"
@@ -68,7 +68,7 @@ export default function AuthPage() {
 
         <Paper
           elevation={isMobile ? 0 : 3}
-          className="w-full max-w-[480px] p-8 md:p-10 rounded-2xl"
+          className="w-full max-w-120 p-8 md:p-10 rounded-2xl"
           sx={{ bgcolor: "background.paper" }}
         >
           <Typography
