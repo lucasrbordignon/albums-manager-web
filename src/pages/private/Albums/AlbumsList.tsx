@@ -265,6 +265,8 @@ function AlbumsList() {
                   const result = await updateAlbum(selectedAlbum.id, {
                     title: data.title,
                     description: data.description,
+                  }).catch(err => {
+                    throw new Error(err.response?.data?.message || 'Erro ao atualizar álbum')
                   })
                   setAlbums(albs =>
                     albs.map(a => (a.id === selectedAlbum.id ? { ...a, ...result.data } : a))
@@ -275,6 +277,8 @@ function AlbumsList() {
                     title: data.title,
                     description: data.description,
                     userId: user?.id || '',
+                  }).catch(err => {
+                    throw new Error(err.response?.data?.message || 'Erro ao criar álbum')
                   })
                   setAlbums(albs => [result.data, ...albs])
                   toast.success('Álbum criado com sucesso!')

@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Eye, EyeOff, ImageUpIcon } from 'lucide-react'
 import { register as registerApi } from '../../../services/auth'
 
 import { Button } from '@/components/ui/button'
@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/form'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useNavigate } from 'react-router'
+import { useAuth } from '@/contexts/AuthContext'
 
 type RegisterFormData = {
   name: string
@@ -29,6 +30,13 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const navigate = useNavigate()
+  const { isAuthenticated } = useAuth()
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/auth/albums', { replace: true })
+    }
+  }, [isAuthenticated, navigate])
 
   const form = useForm<RegisterFormData>({
     defaultValues: {
@@ -52,143 +60,157 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nome completo</FormLabel>
-                <FormControl>
-                  <Input placeholder="Seu nome" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="w-full max-w-md p-8 bg-white dark:bg-card rounded-lg shadow-lg border border-gray-200 dark:border-gray-800">
+        <div className="flex items-center justify-center gap-4 mb-10">
+          <ImageUpIcon className="h-8 w-8 text-primary" />
+          <h1 className="text-2xl font-semibold text-shadow-2xs">Meus álbuns de fotos</h1>
+        </div>
 
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>E-mail</FormLabel>
-                <FormControl>
-                  <Input placeholder="exemplo@email.com" type="email" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <h1 className="text-xl font-semibold mb-4">Crie sua conta</h1>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" autoComplete="on">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nome completo</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Seu nome" autoComplete="name" required {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Senha</FormLabel>
-                <div className="relative">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>E-mail</FormLabel>
                   <FormControl>
                     <Input
-                      type={showPassword ? 'text' : 'password'}
-                      className="pr-10"
+                      placeholder="exemplo@email.com"
+                      type="email"
+                      autoComplete="email"
+                      inputMode="email"
+                      required
                       {...field}
-                      autoComplete="new-password"
-                      placeholder="*********"
                     />
                   </FormControl>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-0 top-0 h-full hover:bg-transparent"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
-                </div>
-                <FormMessage />
-              </FormItem>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Senha</FormLabel>
+                  <div className="relative">
+                    <FormControl>
+                      <Input
+                        type={showPassword ? 'text' : 'password'}
+                        className="pr-10"
+                        autoComplete="new-password"
+                        placeholder="*********"
+                        required
+                        {...field}
+                      />
+                    </FormControl>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-0 top-0 h-full hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                      tabIndex={-1}
+                      aria-label={showPassword ? 'Esconder senha' : 'Mostrar senha'}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Confirmar senha</FormLabel>
+                  <div className="relative">
+                    <FormControl>
+                      <Input
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        className="pr-10"
+                        autoComplete="new-password"
+                        placeholder="*********"
+                        required
+                        {...field}
+                      />
+                    </FormControl>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-0 top-0 h-full hover:bg-transparent"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      tabIndex={-1}
+                      aria-label={showConfirmPassword ? 'Esconder senha' : 'Mostrar senha'}
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button type="submit" className="w-full mt-2" disabled={form.formState.isSubmitting}>
+              {form.formState.isSubmitting ? 'Criando...' : 'Criar conta'}
+            </Button>
+
+            <p className="text-xs text-muted-foreground text-center">
+              Ao continuar, você concorda com nossos Termos e Política de Privacidade.
+            </p>
+            <Button
+              type="button"
+              onClick={() => navigate('/')}
+              variant={'outline'}
+              className="w-full mt-2"
+            >
+              Entre
+            </Button>
+
+            {error && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Erro</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
             )}
-          />
 
-          <FormField
-            control={form.control}
-            name="confirmPassword"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Confirmar senha</FormLabel>
-                <div className="relative">
-                  <FormControl>
-                    <Input
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      className="pr-10"
-                      {...field}
-                      autoComplete="new-password"
-                      placeholder="*********"
-                    />
-                  </FormControl>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-0 top-0 h-full hover:bg-transparent"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-                <FormMessage />
-              </FormItem>
+            {success && (
+              <Alert className="border-green-500 text-green-600">
+                <CheckCircle2 className="h-4 w-4 stroke-green-600" />
+                <AlertTitle>Sucesso</AlertTitle>
+                <AlertDescription>Conta criada com sucesso!</AlertDescription>
+              </Alert>
             )}
-          />
-
-          <Button type="submit" className="w-full mt-2" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting ? 'Criando...' : 'Criar conta'}
-          </Button>
-
-          <p className="text-xs text-muted-foreground text-center">
-            Ao continuar, você concorda com nossos Termos e Política de Privacidade.
-          </p>
-
-          <div className="flex items-center my-4">
-            <div className="flex-1 border-t border-gray-300" />
-            <span className="mx-4 text-gray-500 select-none">ou</span>
-            <div className="flex-1 border-t border-gray-300" />
-          </div>
-
-          <Button
-            type="button"
-            onClick={() => navigate('/login')}
-            variant={'outline'}
-            className="w-full"
-          >
-            Entre
-          </Button>
-
-          {error && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Erro</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
-          {success && (
-            <Alert className="border-green-500 text-green-600">
-              <CheckCircle2 className="h-4 w-4 stroke-green-600" />
-              <AlertTitle>Sucesso</AlertTitle>
-              <AlertDescription>Conta criada com sucesso!</AlertDescription>
-            </Alert>
-          )}
-        </form>
-      </Form>
+          </form>
+        </Form>
+      </div>
     </div>
   )
 }

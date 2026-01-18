@@ -1,5 +1,5 @@
 import { api } from '@/config/api'
-import { isAuthenticated, refreshToken } from '@/services/auth'
+import { isAuthenticated } from '@/services/auth'
 import { createContext, useContext, useEffect, useState } from 'react'
 
 type User = {
@@ -26,51 +26,34 @@ const AuthContext = createContext<AuthContextType | null>(null)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [tokens, setTokens] = useState<AuthTokens | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const restoreSession = async () => {
       const stored = localStorage.getItem('auth')
-      if (!stored) return
+      if (!stored) {
+        setLoading(false)
+        return
+      }
 
       const parsed = JSON.parse(stored)
-
       api.defaults.headers.common.Authorization = `Bearer ${parsed.accessToken}`
 
       try {
         await isAuthenticated()
-
         setUser(parsed.user)
         setTokens({
           accessToken: parsed.accessToken,
           refreshToken: parsed.refreshToken,
         })
       } catch {
-        try {
-          const response = await refreshToken(parsed.refreshToken)
-
-          const { accessToken } = response.data
-
-          api.defaults.headers.common.Authorization = `Bearer ${accessToken}`
-
-          setUser(parsed.user)
-          setTokens({
-            accessToken,
-            refreshToken: parsed.refreshToken,
-          })
-
-          localStorage.setItem(
-            'auth',
-            JSON.stringify({
-              ...parsed,
-              accessToken,
-            })
-          )
-        } catch {
-          logout()
-        }
+        setUser(null)
+        setTokens(null)
+        localStorage.removeItem('auth')
+      } finally {
+        setLoading(false)
       }
     }
-
     restoreSession()
   }, [])
 
@@ -90,6 +73,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     delete api.defaults.headers.common.Authorization
   }
 
+  if (loading) {
+    return null
+  }
   return (
     <AuthContext.Provider
       value={{

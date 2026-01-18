@@ -12,13 +12,13 @@ export function AppRoutes() {
     <BrowserRouter>
       <Routes>
         <Route element={<PublicLayout />}>
-          <Route path="/login" element={<LoginPage />} />
+          <Route path="/" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
         </Route>
 
         <Route element={<PrivateLayout />}>
-          <Route path="/private/albums" element={<AlbumsList />} />
-          <Route path="/private/photos" element={<Profile />} />
+          <Route path="/auth/albums" element={<AlbumsList />} />
+          <Route path="/auth/photos" element={<Profile />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -40,7 +40,7 @@ api.interceptors.response.use(
       const { refreshToken } = JSON.parse(stored)
 
       try {
-        const { data } = await api.post('/auth/refresh', { refreshToken })
+        const { data } = await api.post('/auth/refresh-token', { refreshToken })
 
         const newAuth = {
           ...JSON.parse(stored),
@@ -56,7 +56,7 @@ api.interceptors.response.use(
       } catch (err) {
         processQueue(err, null)
         localStorage.removeItem('auth')
-        window.location.href = '/auth'
+        window.location.href = '/'
         return Promise.reject(err)
       } finally {
         isRefreshing = false

@@ -10,7 +10,7 @@ export function PrivateLayout() {
   const firstName = user?.name.split(' ')[0] || 'Usuário'
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
+    return <Navigate to="/" replace />
   }
 
   return (
