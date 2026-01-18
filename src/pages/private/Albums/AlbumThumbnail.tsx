@@ -1,4 +1,4 @@
-import { Image, MoreHorizontal, Eye, Pencil, Trash } from 'lucide-react'
+import { Image, MoreHorizontal, Pencil, Trash } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import {
   DropdownMenu,
@@ -29,26 +29,37 @@ type Props = {
 
 export default function AlbumThumbnail({ album, onView, onEdit, onDelete }: Props) {
   return (
-    <Card className="group overflow-hidden transition hover:shadow-md relative">
+    <Card
+      className="group overflow-hidden transition hover:shadow-md relative cursor-pointer"
+      onClick={() => onView && onView(album)}
+      tabIndex={0}
+      role="button"
+      aria-label={`Visualizar álbum ${album.title}`}
+      onKeyDown={e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          onView && onView(album)
+        }
+      }}
+    >
       <div className="aspect-video bg-muted flex items-center justify-center">
         <Image className="h-10 w-10 text-muted-foreground" />
       </div>
 
       <CardHeader className="pb-2 flex flex-row items-start justify-between">
         <h3 className="font-semibold line-clamp-1 flex-1 pr-2">{album.title}</h3>
-        {(onView || onEdit || onDelete) && (
+        {(onEdit || onDelete) && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-7 w-7 p-0">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 p-0"
+                onClick={e => e.stopPropagation()}
+              >
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {onView && (
-                <DropdownMenuItem onClick={() => onView(album)}>
-                  <Eye className="mr-2 h-4 w-4" /> Visualizar
-                </DropdownMenuItem>
-              )}
               {onEdit && (
                 <DropdownMenuItem onClick={() => onEdit(album)}>
                   <Pencil className="mr-2 h-4 w-4" /> Editar

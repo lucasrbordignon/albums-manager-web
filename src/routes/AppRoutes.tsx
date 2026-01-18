@@ -3,7 +3,7 @@ import { PublicLayout } from '../layouts/PublicLayout'
 import { PrivateLayout } from '../layouts/PrivateLayout'
 
 import AlbumsList from '../pages/private/Albums/AlbumsList'
-import Profile from '../pages/private/Photos'
+import Profile from '../pages/private/Photos/PhotosList'
 import LoginPage from '@/pages/public/auth/LoginPage'
 import RegisterPage from '@/pages/public/auth/RegisterPage'
 
@@ -18,6 +18,7 @@ export function AppRoutes() {
 
         <Route element={<PrivateLayout />}>
           <Route path="/auth/albums" element={<AlbumsList />} />
+          <Route path="/auth/albums/:albumId/photos" element={<Profile />} />
           <Route path="/auth/photos" element={<Profile />} />
         </Route>
       </Routes>

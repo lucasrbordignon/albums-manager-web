@@ -54,7 +54,20 @@ export default function AlbumTable({ albums, onView, onEdit, onDelete }: Props) 
         <TableBody>
           {albums.map(album => (
             <TableRow key={album.id} className="hover:bg-muted/50">
-              <TableCell className="font-medium">{album.title}</TableCell>
+              <TableCell
+                className="font-medium text-primary cursor-pointer hover:underline"
+                onClick={() => onView(album)}
+                tabIndex={0}
+                role="button"
+                aria-label={`Visualizar álbum ${album.title}`}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    onView(album)
+                  }
+                }}
+              >
+                {album.title}
+              </TableCell>
 
               <TableCell className="text-muted-foreground line-clamp-1 max-w-xs">
                 {album.description}

@@ -1,0 +1,210 @@
+import ContentWrapper from '@/components/layout/ContentWrapper'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { getPhotosByAlbum } from '@/services/albums'
+import { Select } from '@radix-ui/react-select'
+import { ChevronLeft, Grid2X2, List, Search } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import PhotoThumbnail, { type Photo } from './PhotoThumbnail'
+import PhotoTable from './PhotoTable'
+import PhotoDialog from './PhotoDialog'
+
+export default function Photos() {
+  const [search, setSearch] = useState('')
+  const [view, setView] = useState<'grid' | 'list'>(() => {
+    const saved = localStorage.getItem('photos_view')
+    return saved === 'list' || saved === 'grid' ? saved : 'grid'
+  })
+  const [sort, setSort] = useState<'recent' | 'title' | 'description'>('recent')
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 767)
+  const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null)
+  const [showModal, setShowModal] = useState(false)
+  const [creating, setCreating] = useState(false)
+  const [photos, setPhotos] = useState<Photo[]>([])
+  const [photosLoading, setPhotosLoading] = useState(false)
+  const [photosError, setPhotosError] = useState<string | null>(null)
+
+  const { albumId } = useParams()
+  const location = useLocation()
+  const navigate = useNavigate()
+  const album = location.state?.album
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 767)
+    }
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
+
+  useEffect(() => {
+    localStorage.setItem('photos_view', view)
+  }, [view])
+
+  useEffect(() => {
+    if (!albumId) return
+    setPhotosLoading(true)
+    setPhotosError(null)
+    getPhotosByAlbum(albumId)
+      .then(res => {
+        setPhotos(res.data?.data || [])
+      })
+      .catch(err => {
+        setPhotosError(err.message || 'Erro ao buscar fotos')
+      })
+      .finally(() => setPhotosLoading(false))
+  }, [albumId])
+
+  const filteredPhotos = useMemo(() => {
+    return photos
+      .filter(photo =>
+        `${photo.title} ${photo.description}`.toLowerCase().includes(search.toLowerCase())
+      )
+      .sort((a, b) => {
+        if (sort === 'recent') {
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+        }
+        if (sort === 'title') {
+          return a.title.localeCompare(b.title)
+        }
+        return a.description.localeCompare(b.description)
+      })
+  }, [photos, search, sort])
+
+  const handleDelete = async (photoId: string) => {
+    // TODO: implementar exclusão via API
+    setPhotos(prev => prev.filter(p => p.id !== photoId))
+  }
+
+  const handleCreate = async (data: any) => {
+    setCreating(true)
+    // TODO: implementar criação via API
+    setCreating(false)
+    setShowModal(false)
+  }
+
+  const handleView = (photo: Photo) => {
+    setSelectedPhoto(photo)
+    // TODO: abrir modal de visualização ou página de detalhes
+  }
+
+  if (!album) {
+    return <div>Álbum não encontrado. ID: {albumId}</div>
+  }
+
+  return (
+    <ContentWrapper>
+      <div className="flex items-center gap-4 mb-6">
+        <ChevronLeft onClick={() => navigate(-1)} className="w-5 h-5 text-primary cursor-pointer" />
+        <h2 className="text-xl font-semibold text-primary">{album.title}</h2>
+      </div>
+      <section className="space-y-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="relative w-full sm:max-w-sm">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por título ou descrição..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="pl-9 bg-(--color-input) text-(--color-foreground) border-b-2 border-(--color-border) focus:border-(--color-primary)"
+              disabled={photosLoading}
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <Select
+              value={sort}
+              onValueChange={(v: 'recent' | 'title' | 'description') => setSort(v)}
+              disabled={photosLoading}
+            >
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Ordenar por" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="recent">Mais recentes</SelectItem>
+                <SelectItem value="title">Título (A–Z)</SelectItem>
+                <SelectItem value="description">Descrição (A–Z)</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              variant={view === 'grid' ? 'default' : 'ghost'}
+              size="icon"
+              onClick={() => setView('grid')}
+              disabled={photosLoading}
+            >
+              <Grid2X2 className="h-4 w-4" />
+            </Button>
+            {!isMobile && (
+              <Button
+                variant={view === 'list' ? 'default' : 'ghost'}
+                size="icon"
+                onClick={() => setView('list')}
+                disabled={photosLoading}
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {photosLoading && <div className="text-muted-foreground">Carregando fotos...</div>}
+        {photosError && <div className="text-red-500">{photosError}</div>}
+        {!photosLoading && !photosError && filteredPhotos.length === 0 && (
+          <div className="text-muted-foreground">Nenhuma foto encontrada.</div>
+        )}
+
+        {!photosLoading && !photosError && filteredPhotos.length > 0 && view === 'grid' && (
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {filteredPhotos.map(photo => (
+              <PhotoThumbnail
+                key={photo.id}
+                photo={photo}
+                onDelete={handleDelete}
+                onView={handleView}
+              />
+            ))}
+          </div>
+        )}
+
+        {!photosLoading &&
+          !photosError &&
+          filteredPhotos.length > 0 &&
+          view === 'list' &&
+          !isMobile && (
+            <PhotoTable photos={filteredPhotos} onView={handleView} onDelete={handleDelete} />
+          )}
+
+        <Button
+          type="button"
+          className="fixed bottom-8 right-8 z-50 flex items-center gap-2 px-5 py-3 font-bold shadow-lg transition-colors"
+          style={{ background: 'var(--color-primary)', color: 'var(--color-primary-foreground)' }}
+          aria-label="Adicionar foto"
+          variant="default"
+          onClick={() => setShowModal(true)}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+            className="w-6 h-6"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+          Nova Foto
+        </Button>
+
+        <PhotoDialog
+          open={showModal}
+          onOpenChange={open => setShowModal(open)}
+          creating={creating}
+          onSubmit={handleCreate}
+        />
+      </section>
+    </ContentWrapper>
+  )
+}

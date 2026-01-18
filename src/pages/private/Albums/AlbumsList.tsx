@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import AlbumThumbnail from './AlbumThumbnail'
+import { useNavigate } from 'react-router-dom'
 import AlbumTable from './AlbumTable'
 import { createAlbum, deleteAlbum, updateAlbum } from '@/services/albums'
 import { toast } from 'sonner'
@@ -20,7 +21,10 @@ import ContentWrapper from '@/components/layout/ContentWrapper'
 import AlbumDialog from './AlbumDialog'
 
 function AlbumsList() {
-  const [view, setView] = useState<'grid' | 'list'>('grid')
+  const [view, setView] = useState<'grid' | 'list'>(() => {
+    const saved = localStorage.getItem('albums_view')
+    return saved === 'list' || saved === 'grid' ? saved : 'grid'
+  })
   const [search, setSearch] = useState('')
   const [sort, setSort] = useState<'recent' | 'title' | 'description'>('recent')
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 767)
@@ -34,6 +38,7 @@ function AlbumsList() {
   const [showModal, setShowModal] = useState(false)
   const [creating, setCreating] = useState(false)
   const { user, tokens, logout } = useAuth()
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (!user) return logout()
@@ -69,6 +74,10 @@ function AlbumsList() {
       setView('grid')
     }
   }, [isMobile, view])
+
+  useEffect(() => {
+    localStorage.setItem('albums_view', view)
+  }, [view])
 
   const filteredAlbums = useMemo(() => {
     return albums
@@ -208,7 +217,9 @@ function AlbumsList() {
                     await handleDelete(albumId)
                   }}
                   onEdit={handleEdit}
-                  onView={() => {}}
+                  onView={album =>
+                    navigate(`/auth/albums/${album.id}/photos`, { state: { album } })
+                  }
                 />
               ))}
             </div>
@@ -217,7 +228,7 @@ function AlbumsList() {
           {status === 'success' && filteredAlbums.length > 0 && view === 'list' && !isMobile && (
             <AlbumTable
               albums={filteredAlbums}
-              onView={() => {}}
+              onView={album => navigate(`/auth/albums/${album.id}/photos`, { state: { album } })}
               onEdit={handleEdit}
               onDelete={async (albumId: string) => {
                 await handleDelete(albumId)

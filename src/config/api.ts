@@ -41,17 +41,17 @@ api.interceptors.response.use(
 
       try {
         const { data } = await api.post('/auth/refresh-token', { refreshToken })
-
+        const newAccessToken = data.token
         const newAuth = {
           ...JSON.parse(stored),
-          accessToken: data.accessToken,
+          accessToken: newAccessToken,
         }
 
         localStorage.setItem('auth', JSON.stringify(newAuth))
 
-        api.defaults.headers.common.Authorization = `Bearer ${data.accessToken}`
+        api.defaults.headers.common.Authorization = `Bearer ${newAccessToken}`
 
-        processQueue(null, data.accessToken)
+        processQueue(null, newAccessToken)
         return api(originalRequest)
       } catch (err) {
         processQueue(err, null)

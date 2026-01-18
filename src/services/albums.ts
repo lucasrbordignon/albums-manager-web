@@ -25,3 +25,8 @@ export async function updateAlbum(
 
   return data
 }
+
+export async function getPhotosByAlbum(albumID: string) {
+  const { data } = await api.get(`/albums/${albumID}/photos`)
+  return data
+}
