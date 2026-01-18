@@ -61,7 +61,7 @@ export default function PhotoTable({ photos, onView, onDelete }: Props) {
                   }
                 }}
               >
-                {photo.title}.{photo.mimeType}
+                {photo.title}
               </TableCell>
               <TableCell className="text-muted-foreground line-clamp-1 max-w-xs">
                 {photo.sizeInBytes} bytes

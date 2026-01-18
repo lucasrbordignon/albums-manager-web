@@ -9,7 +9,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import PhotoThumbnail, { type Photo } from './PhotoThumbnail'
 import PhotoTable from './PhotoTable'
-import PhotoDialog from './PhotoDialog'
+import { PhotoDialog } from './PhotoDialog'
 
 export default function Photos() {
   const [search, setSearch] = useState('')
@@ -61,30 +61,21 @@ export default function Photos() {
 
   const filteredPhotos = useMemo(() => {
     return photos
-      .filter(photo =>
-        `${photo.title} ${photo.description}`.toLowerCase().includes(search.toLowerCase())
-      )
+      .filter(photo => `${photo.title}`.toLowerCase().includes(search.toLowerCase()))
       .sort((a, b) => {
         if (sort === 'recent') {
-          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+          return new Date(b.acquiredAt).getTime() - new Date(a.acquiredAt).getTime()
         }
         if (sort === 'title') {
           return a.title.localeCompare(b.title)
         }
-        return a.description.localeCompare(b.description)
+        return 0
       })
   }, [photos, search, sort])
 
   const handleDelete = async (photoId: string) => {
     // TODO: implementar exclusão via API
     setPhotos(prev => prev.filter(p => p.id !== photoId))
-  }
-
-  const handleCreate = async (data: any) => {
-    setCreating(true)
-    // TODO: implementar criação via API
-    setCreating(false)
-    setShowModal(false)
   }
 
   const handleView = (photo: Photo) => {
@@ -202,7 +193,6 @@ export default function Photos() {
           open={showModal}
           onOpenChange={open => setShowModal(open)}
           creating={creating}
-          onSubmit={handleCreate}
         />
       </section>
     </ContentWrapper>

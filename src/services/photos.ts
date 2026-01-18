@@ -1,15 +1,16 @@
 import { api } from '@/config/api'
 
-export async function deleteAlbum(albumID: string) {
-  const { data } = await api.delete(`/albums/${albumID}`)
+export async function uploadPhoto(formData: FormData, token?: string) {
+  const { data } = await api.post('/photos/upload', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  })
   return data
 }
 
-export async function updateAlbum(
-  albumID: string,
-  payload: { title?: string; description?: string }
-) {
-  const { data } = await api.put(`/albums/${albumID}`, payload)
-
+export async function deletePhoto(photoID: string) {
+  const { data } = await api.delete(`/photos/${photoID}`)
   return data
 }

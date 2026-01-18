@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Trash, Image } from 'lucide-react'
+import { Trash } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -22,16 +22,12 @@ import {
 export type Photo = {
   id: string
   title: string
-  description: string
   acquiredAt: string
   sizeInBytes: number
   mimeType: string
-  filePath: string
+  imageUrl: string
+  thumbnailUrl: string
   dominantColor: string
-  createdAt: string
-  updatedAt: string
-  deletedAt: string | null
-  albumId: string
 }
 
 type Props = {
@@ -55,7 +51,11 @@ export default function PhotoThumbnail({ photo, onView, onDelete }: Props) {
       }}
     >
       <div className="aspect-video bg-muted flex items-center justify-center">
-        <Image className="h-10 w-10 text-muted-foreground" />
+        <img
+          src={photo.thumbnailUrl}
+          alt={photo.title}
+          className="h-full w-full object-cover group-hover:scale-105 transition-transform"
+        />
       </div>
       <CardHeader className="pb-2 flex flex-row items-start justify-between">
         <h3 className="font-semibold line-clamp-1 flex-1 pr-2">{photo.title}</h3>
@@ -104,10 +104,9 @@ export default function PhotoThumbnail({ photo, onView, onDelete }: Props) {
         )}
       </CardHeader>
       <CardContent className="space-y-1 text-sm">
-        <p className="text-muted-foreground line-clamp-2">{photo.description}</p>
         <div className="flex justify-between text-xs text-muted-foreground">
           <span>{photo.mimeType}</span>
-          <span>{new Date(photo.updatedAt).toLocaleDateString()}</span>
+          <span>{new Date(photo.acquiredAt).toLocaleDateString()}</span>
         </div>
       </CardContent>
     </Card>
