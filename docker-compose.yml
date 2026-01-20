@@ -1,6 +1,7 @@
 services:
   frontend:
     container_name: albuns-web
+    build: .
     ports:
       - '80:80'
     volumes:
