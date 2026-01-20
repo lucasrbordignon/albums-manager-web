@@ -76,7 +76,8 @@ export default function PhotoThumbnail({ photo, onView, onDelete }: Props) {
                 <AlertDialogTrigger asChild>
                   <DropdownMenuItem
                     className="text-destructive focus:text-destructive"
-                    onSelect={e => e.preventDefault()}
+                    onSelect={e => {e.stopPropagation(); e.preventDefault()}}
+                    onClick={e => e.stopPropagation()}
                   >
                     <Trash className="mr-2 h-4 w-4" /> Excluir
                   </DropdownMenuItem>
@@ -92,7 +93,7 @@ export default function PhotoThumbnail({ photo, onView, onDelete }: Props) {
                     <AlertDialogCancel>Cancelar</AlertDialogCancel>
                     <AlertDialogAction
                       className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      onClick={() => onDelete(photo.id)}
+                      onClick={e => { e.stopPropagation(); onDelete(photo.id) }}
                     >
                       Excluir
                     </AlertDialogAction>

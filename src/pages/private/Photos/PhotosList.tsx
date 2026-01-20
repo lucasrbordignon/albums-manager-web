@@ -58,7 +58,7 @@ export default function PhotosList() {
         setPhotos(res.data?.data || [])
       })
       .catch(err => {
-        setPhotosError(err.message || 'Erro ao buscar fotos')
+        setPhotosError(err.response.data.message || 'Erro ao buscar fotos')
       })
       .finally(() => setPhotosLoading(false))
   }, [albumId])
@@ -218,7 +218,7 @@ export default function PhotosList() {
               toast.success('Foto enviada com sucesso!')
               setShowModal(false)
             } catch (err: any) {
-              toast.error(err.message || 'Erro ao enviar foto')
+              toast.error(err.response.data.message || 'Erro ao enviar foto')
             } finally {
               setCreating(false)
             }

@@ -33,8 +33,8 @@ function AlbumsList() {
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create')
 
   const [albums, setAlbums] = useState<Album[]>([])
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
-  const [error, setError] = useState<string | null>(null)
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle')
+  const [albumsError, setAlbumsError] = useState<string | null>(null)
   const [showModal, setShowModal] = useState(false)
   const [creating, setCreating] = useState(false)
   const { user, tokens, logout } = useAuth()
@@ -43,15 +43,26 @@ function AlbumsList() {
   useEffect(() => {
     if (!user) return logout()
     setStatus('loading')
-    setError(null)
+    setAlbumsError(null)
     findAlbumsByUser(user.id)
       .then(albumsData => {
         setAlbums(albumsData.data)
         setStatus('success')
       })
       .catch(e => {
-        setError(e.message || 'Erro ao buscar álbuns')
-        setStatus('error')
+        const isAlbumsNotFound =
+          (e?.message &&
+            (e.message === 'Albums not found' ||
+              e.message === 'Request failed with status code 404' ||
+              (e.response && e.response.data && e.response.data.message === 'Nenhum álbum encontrado')))
+          || (e?.response && e.response.status === 404)
+        if (isAlbumsNotFound) {
+          setAlbums([])
+          setStatus('success')
+        } else {
+          setAlbumsError(e.message || 'Erro ao buscar álbuns')
+          setStatus('success')
+        }
       })
   }, [user, tokens, logout])
 
@@ -109,7 +120,7 @@ function AlbumsList() {
       setAlbums(prev => prev.filter(a => a.id !== albumId))
       toast.success('Álbum excluído com sucesso!')
     } catch (err: any) {
-      toast.error(err.message || 'Erro ao excluir álbum')
+      toast.error(err.response.data.message || 'Erro ao excluir álbum')
     }
   }
 
@@ -199,12 +210,12 @@ function AlbumsList() {
             </div>
           )}
 
-          {status === 'error' && (
-            <p className="text-center text-sm text-red-500">{error || 'Erro ao buscar álbuns.'}</p>
+          {albumsError && (
+            <p className="text-center text-sm text-red-500">{albumsError}</p>
           )}
 
-          {status === 'success' && filteredAlbums.length === 0 && (
-            <p className="text-center text-sm text-muted-foreground">Nenhum álbum encontrado.</p>
+          {status === 'success' && !albumsError && filteredAlbums.length === 0 && (
+            <div className="text-muted-foreground">Nenhum Álbum encontrado.</div>
           )}
 
           {status === 'success' && filteredAlbums.length > 0 && view === 'grid' && (
@@ -298,7 +309,7 @@ function AlbumsList() {
                 setSelectedAlbum(null)
                 setDialogMode('create')
               } catch (err: any) {
-                toast.error(err.message || 'Erro ao salvar álbum')
+                toast.error(err.response.data.message || 'Erro ao salvar álbum')
               } finally {
                 setCreating(false)
               }

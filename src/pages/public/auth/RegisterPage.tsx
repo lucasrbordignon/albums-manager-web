@@ -45,6 +45,7 @@ export default function RegisterPage() {
       password: '',
       confirmPassword: '',
     },
+    mode: 'onTouched',
   })
 
   const onSubmit = async (data: RegisterFormData) => {
@@ -54,8 +55,8 @@ export default function RegisterPage() {
       await registerApi(data)
       setSuccess(true)
       form.reset()
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Erro ao registrar')
+    } catch (err: any) {
+      setError(err.response.data.message || 'Erro ao registrar')
     }
   }
 
@@ -108,6 +109,17 @@ export default function RegisterPage() {
             <FormField
               control={form.control}
               name="password"
+              rules={{
+                required: 'Senha é obrigatória',
+                minLength: {
+                  value: 6,
+                  message: 'A senha deve ter pelo menos 6 caracteres',
+                },
+                maxLength: {
+                  value: 20,
+                  message: 'A senha deve ter no máximo 20 caracteres',
+                },
+              }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Senha</FormLabel>
@@ -142,6 +154,11 @@ export default function RegisterPage() {
             <FormField
               control={form.control}
               name="confirmPassword"
+              rules={{
+                required: 'Confirmação de senha é obrigatória',
+                validate: (value) =>
+                  value === form.getValues('password') || 'As senhas não coincidem',
+              }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Confirmar senha</FormLabel>
