@@ -1,7 +1,6 @@
 services:
   frontend:
     container_name: albuns-web
-    restart: unless-stopped
     ports:
       - '80:80'
     volumes:
@@ -9,5 +8,3 @@ services:
       - /app/node_modules
     environment:
       - CHOKIDAR_USEPOLLING=true
-    networks:
-      - app-network
