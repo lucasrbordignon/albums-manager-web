@@ -9,9 +9,13 @@ import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import PhotoThumbnail, { type Photo } from './PhotoThumbnail'
 import PhotoTable from './PhotoTable'
+import { deletePhoto, uploadPhoto } from '@/services/photos'
+import { toast } from 'sonner'
+import { useAuth } from '@/contexts/AuthContext'
 import { PhotoDialog } from './PhotoDialog'
 
-export default function Photos() {
+export default function PhotosList() {
+  const { tokens } = useAuth()
   const [search, setSearch] = useState('')
   const [view, setView] = useState<'grid' | 'list'>(() => {
     const saved = localStorage.getItem('photos_view')
@@ -74,7 +78,13 @@ export default function Photos() {
   }, [photos, search, sort])
 
   const handleDelete = async (photoId: string) => {
-    // TODO: implementar exclusão via API
+    const response = await deletePhoto(photoId)
+    if (!response) {
+      toast.error('Erro ao deletar foto')
+      return
+    }
+
+    toast.success('Foto deletada com sucesso')
     setPhotos(prev => prev.filter(p => p.id !== photoId))
   }
 
@@ -193,6 +203,26 @@ export default function Photos() {
           open={showModal}
           onOpenChange={open => setShowModal(open)}
           creating={creating}
+          onSubmit={async ({ title, description, file }) => {
+            if (!file || !albumId) return
+            setCreating(true)
+            try {
+              const formData = new FormData()
+              formData.append('file', file)
+              formData.append('title', title)
+              formData.append('albumId', albumId)
+              if (description) formData.append('description', description)
+
+              const photo = await uploadPhoto(formData, tokens?.accessToken)
+              setPhotos(prev => [photo.data, ...prev])
+              toast.success('Foto enviada com sucesso!')
+              setShowModal(false)
+            } catch (err: any) {
+              toast.error(err.message || 'Erro ao enviar foto')
+            } finally {
+              setCreating(false)
+            }
+          }}
         />
       </section>
     </ContentWrapper>

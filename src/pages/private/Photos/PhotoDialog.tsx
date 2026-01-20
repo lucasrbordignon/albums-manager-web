@@ -2,47 +2,25 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useForm } from 'react-hook-form'
-import { useState } from 'react'
-import { useAuth } from '@/contexts/AuthContext'
-import { uploadPhoto } from '@/services/photos'
+import { useEffect, useState } from 'react'
 
 type PhotoFormData = {
   title: string
   description?: string
+  file: File
 }
 
 type Props = {
   open: boolean
   onOpenChange: (open: boolean) => void
   creating: boolean
+  onSubmit: (data: PhotoFormData) => Promise<void>
 }
 
-export function PhotoDialog({ open, onOpenChange, creating }: Props) {
+export function PhotoDialog({ open, onOpenChange, creating, onSubmit }: Props) {
   const { register, handleSubmit, reset, setValue, setFocus } = useForm<PhotoFormData>()
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
-  const auth = useAuth()
-
-  const albumId = window.location.pathname.split('/', 4).pop() || ''
-
-  async function onSubmit(data: PhotoFormData) {
-    if (!file) return
-
-    const formData = new FormData()
-    formData.append('file', file)
-    formData.append('title', data.title)
-    formData.append('albumId', albumId || '')
-    if (data.description) {
-      formData.append('description', data.description)
-    }
-
-    await uploadPhoto(formData, auth.tokens?.accessToken)
-
-    reset()
-    setFile(null)
-    setPreview(null)
-    onOpenChange(false)
-  }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const selected = e.target.files?.[0]
@@ -57,6 +35,22 @@ export function PhotoDialog({ open, onOpenChange, creating }: Props) {
     setFocus('description')
   }
 
+  useEffect(() => {
+    if (!open) {
+      reset()
+      setFile(null)
+      setPreview(null)
+    }
+  }, [open, reset])
+
+  function handleFormSubmit(data: PhotoFormData) {
+    if (!file) return
+    onSubmit({ ...data, file })
+    reset()
+    setFile(null)
+    setPreview(null)
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -64,7 +58,7 @@ export function PhotoDialog({ open, onOpenChange, creating }: Props) {
           <DialogTitle>Adicionar foto</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
           <Input
             className="bg-muted cursor-not-allowed"
             placeholder="Título da foto"
