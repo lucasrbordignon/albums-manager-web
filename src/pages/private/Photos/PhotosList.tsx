@@ -90,7 +90,7 @@ export default function PhotosList() {
 
   const handleView = (photo: Photo) => {
     setSelectedPhoto(photo)
-    // TODO: abrir modal de visualização ou página de detalhes
+    setShowModal(false)
   }
 
   if (!album) {
@@ -224,6 +224,32 @@ export default function PhotosList() {
             }
           }}
         />
+
+        {/* Modal de visualização de foto */}
+        {selectedPhoto && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+            onClick={() => setSelectedPhoto(null)}
+            style={{ cursor: 'zoom-out' }}
+          >
+            <div
+              className="bg-background rounded-lg shadow-lg max-w-full max-h-full p-4 flex flex-col items-center"
+              onClick={e => e.stopPropagation()}
+              style={{ minWidth: 320, minHeight: 200 }}
+            >
+              <img
+                src={selectedPhoto.imageUrl}
+                alt={selectedPhoto.title}
+                className="max-h-[60vh] max-w-[80vw] rounded mb-4"
+                style={{ objectFit: 'contain' }}
+              />
+              <h3 className="text-lg font-semibold mb-1 text-center">{selectedPhoto.title}</h3>
+              <Button variant="secondary" onClick={() => setSelectedPhoto(null)}>
+                Fechar
+              </Button>
+            </div>
+          </div>
+        )}
       </section>
     </ContentWrapper>
   )
