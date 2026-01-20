@@ -52,8 +52,8 @@ export default function LoginPage() {
       login(userData.data)
       setSuccess(true)
       navigate('/auth/albums', { replace: true })
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.response.data.message : 'Erro ao fazer login')
+    } catch (err: any) {
+      setError(err.response.data.message || 'Erro ao fazer login')
     }
   }
 
