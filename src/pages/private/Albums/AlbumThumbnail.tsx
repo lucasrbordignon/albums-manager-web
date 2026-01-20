@@ -61,7 +61,12 @@ export default function AlbumThumbnail({ album, onView, onEdit, onDelete }: Prop
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               {onEdit && (
-                <DropdownMenuItem onClick={() => onEdit(album)}>
+                <DropdownMenuItem
+                  onClick={e => {
+                    e.stopPropagation()
+                    onEdit(album)
+                  }}
+                >
                   <Pencil className="mr-2 h-4 w-4" /> Editar
                 </DropdownMenuItem>
               )}
@@ -70,7 +75,11 @@ export default function AlbumThumbnail({ album, onView, onEdit, onDelete }: Prop
                   <AlertDialogTrigger asChild>
                     <DropdownMenuItem
                       className="text-destructive focus:text-destructive"
-                      onSelect={e => e.preventDefault()}
+                      onClick={e => e.stopPropagation()}
+                      onSelect={e => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                      }}
                     >
                       <Trash className="mr-2 h-4 w-4" /> Excluir
                     </DropdownMenuItem>
@@ -86,7 +95,11 @@ export default function AlbumThumbnail({ album, onView, onEdit, onDelete }: Prop
                       <AlertDialogCancel>Cancelar</AlertDialogCancel>
                       <AlertDialogAction
                         className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        onClick={() => onDelete(album.id)}
+                        onClick={e => {
+                          e.stopPropagation()
+                          onDelete(album.id)
+                        }}
+                        tabIndex={0}
                       >
                         Excluir
                       </AlertDialogAction>
