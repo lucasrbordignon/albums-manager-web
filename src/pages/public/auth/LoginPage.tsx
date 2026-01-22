@@ -65,8 +65,6 @@ export default function LoginPage() {
           <h1 className="text-2xl font-semibold text-shadow-2xs">Meus álbuns de fotos</h1>
         </div>
 
-        <h1 className="text-xl font-semibold mb-4">Bem-vindo de volta!</h1>
-
         <h1 className="text-xl font-semibold mb-4">Faça login na sua conta</h1>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" autoComplete="on">
