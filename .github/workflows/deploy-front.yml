@@ -10,13 +10,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Build image
-        run: |
-          docker build -t albums-frontend .
-
       - name: Deploy on server
         uses: appleboy/ssh-action@v1
         with:
@@ -24,9 +17,19 @@ jobs:
           username: deploy
           key: ${{ secrets.SSH_KEY }}
           script: |
+            set -e
+
+            cd /var/www/albums-frontend
+
+            git pull origin main
+
             docker stop albuns-web || true
             docker rm albuns-web || true
+
+            docker build -t albums-frontend .
+
             docker run -d \
               --name albuns-web \
+              --restart unless-stopped \
               -p 8080:80 \
               albums-frontend
