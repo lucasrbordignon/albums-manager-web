@@ -23,13 +23,29 @@ jobs:
 
             git pull origin main
 
-            docker stop albuns-web || true
-            docker rm albuns-web || true
+            echo "Building new image..."
+            docker build -t albums-frontend:new .
 
-            docker build -t albums-frontend .
+            echo "Starting new container on 8081..."
+            docker rm -f albuns-web-new || true
+            docker run -d \
+              --name albuns-web-new \
+              --restart unless-stopped \
+              -p 8081:80 \
+              albums-frontend:new
 
+            echo "Waiting for healthcheck..."
+            sleep 3
+            curl -f http://127.0.0.1:8081
+
+            echo "Switching containers..."
+            docker rm -f albuns-web || true
             docker run -d \
               --name albuns-web \
               --restart unless-stopped \
               -p 8080:80 \
-              albums-frontend
+              albums-frontend:new
+
+            docker rm -f albuns-web-new || true
+
+            echo "Deploy completed successfully"
