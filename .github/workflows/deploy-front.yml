@@ -19,7 +19,7 @@ jobs:
           script: |
             set -e
 
-            cd /var/www/albums-frontend
+            cd /var/www/albums-manager-web
 
             git pull origin main
 
