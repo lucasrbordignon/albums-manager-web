@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { AlertCircle, CheckCircle2, Eye, EyeOff, ImageUpIcon } from 'lucide-react'
+import { Eye, EyeOff, ImageUpIcon } from 'lucide-react'
 import { register as registerApi } from '../../../services/auth'
+import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,9 +14,9 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useNavigate } from 'react-router'
 import { useAuth } from '@/contexts/AuthContext'
+import { login as loginApi } from '../../../services/auth'
 
 type RegisterFormData = {
   name: string
@@ -25,12 +26,10 @@ type RegisterFormData = {
 }
 
 export default function RegisterPage() {
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const navigate = useNavigate()
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, login } = useAuth()
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -49,14 +48,32 @@ export default function RegisterPage() {
   })
 
   const onSubmit = async (data: RegisterFormData) => {
-    setError(null)
-    setSuccess(false)
     try {
       await registerApi(data)
-      setSuccess(true)
+      toast.success('Conta criada com sucesso!')
+
+      loginApi({ email: data.email, password: data.password })
+        .then(payload => {
+          login({
+            user: payload.data.user,
+            accessToken: payload.data.accessToken,
+            refreshToken: payload.data.refreshToken,
+          })
+
+          toast.success('Login realizado com sucesso!')
+          navigate('/auth/albums', { replace: true })
+        })
+        .catch(err => {
+          const message =
+            err?.response?.data?.message ||
+            err?.response?.data?.error ||
+            'Erro ao fazer login. Verifique suas credenciais.'
+  
+          toast.error(message)
+        })
       form.reset()
     } catch (err: any) {
-      setError(err.response.data.message || 'Erro ao registrar')
+      toast.error(err?.response?.data?.message || 'Erro ao registrar')
     }
   }
 
@@ -210,21 +227,7 @@ export default function RegisterPage() {
               Entre
             </Button>
 
-            {error && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Erro</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
-            {success && (
-              <Alert className="border-green-500 text-green-600">
-                <CheckCircle2 className="h-4 w-4 stroke-green-600" />
-                <AlertTitle>Sucesso</AlertTitle>
-                <AlertDescription>Conta criada com sucesso!</AlertDescription>
-              </Alert>
-            )}
+            {/* Mensagens de sucesso/erro agora são exibidas via toast */}
           </form>
         </Form>
       </div>

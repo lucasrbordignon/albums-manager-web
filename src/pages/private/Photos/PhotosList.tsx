@@ -218,7 +218,15 @@ export default function PhotosList() {
               toast.success('Foto enviada com sucesso!')
               setShowModal(false)
             } catch (err: any) {
-              toast.error(err.response.data.message || 'Erro ao enviar foto')
+              let errorMsg = 'Erro ao enviar foto'
+              if (err?.response?.data?.message) {
+                errorMsg = err.response.data.message
+              } else if (err?.response?.data?.error) {
+                errorMsg = err.response.data.error
+              } else if (err?.message) {
+                errorMsg = err.message
+              }
+              toast.error(errorMsg)
             } finally {
               setCreating(false)
             }

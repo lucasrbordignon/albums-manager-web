@@ -21,6 +21,16 @@ api.interceptors.response.use(
   async error => {
     const originalRequest = error.config
 
+    const publicRoutes = [
+      '/auth/login',
+      '/auth/register',
+      '/auth/refresh-token',
+    ]
+
+    if (publicRoutes.some(route => originalRequest.url?.includes(route))) {
+      return Promise.reject(error)
+    }
+
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {

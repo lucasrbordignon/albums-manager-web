@@ -28,6 +28,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [tokens, setTokens] = useState<AuthTokens | null>(null)
   const [loading, setLoading] = useState(true)
 
+  console.log('AuthProvider render')
+
+  useEffect(() => { 
+    console.log('AuthProvider useEffect - isAuthenticated:', !!user && !!tokens?.accessToken)
+  }, [user, tokens])
+
   useEffect(() => {
     const restoreSession = async () => {
       const stored = localStorage.getItem('auth')
